@@ -193,23 +193,25 @@ async def generate_image(task_id: int, db: AsyncSession = Depends(get_db)):
         task.product_name, task.product_category, task.prompt
     )
 
-    # 4. 上传到 MinIO
-    from minio.error import S3Error
-    import io
+    # 4. 上传到 MinIO（失败时用 base64 data URL 兜底）
+    import io as _io
+    import base64 as _b64
     object_name = f"products/{task_id}/{gen_result['image_hash'][:16]}.png"
     try:
         minio = get_minio()
         minio.put_object(
             settings.MINIO_BUCKET,
             object_name,
-            io.BytesIO(gen_result["image_bytes"]),
+            _io.BytesIO(gen_result["image_bytes"]),
             len(gen_result["image_bytes"]),
             content_type="image/png",
         )
         image_url = f"http://{settings.MINIO_ENDPOINT}/{settings.MINIO_BUCKET}/{object_name}"
     except Exception as e:
-        image_url = None
-        print(f"MinIO 上传失败: {e}")
+        # MinIO 不可用时，用 base64 data URL 返回图片
+        b64_str = _b64.b64encode(gen_result["image_bytes"]).decode()
+        image_url = f"data:image/png;base64,{b64_str}"
+        print(f"MinIO 不可用，使用 base64 返回图片: {e}")
 
     # 5. 保存图片记录
     image = GeneratedImage(
