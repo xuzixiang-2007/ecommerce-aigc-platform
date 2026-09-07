@@ -1,8 +1,4 @@
-## Render Blueprint 配置文件
-## 部署电商AIGC商品图合规溯源存证平台
-## 文档: https://render.com/docs/blueprint-spec
 services:
-  # ===== 后端 API 服务 =====
   - type: web
     name: aigc-platform-backend
     runtime: python
@@ -26,7 +22,6 @@ services:
       - key: JWT_SECRET
         value: aigc-platform-secret-2024
 
-  # ===== 前端静态站点 =====
   - type: web
     name: aigc-platform-frontend
     runtime: static
@@ -47,7 +42,6 @@ services:
           name: aigc-platform-backend
           property: url
 
-# ===== 数据库 =====
 databases:
   - name: aigc-db
     region: singapore
