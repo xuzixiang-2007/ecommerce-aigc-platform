@@ -1,0 +1,55 @@
+## Render Blueprint 配置文件
+## 部署电商AIGC商品图合规溯源存证平台
+## 文档: https://render.com/docs/blueprint-spec
+services:
+  # ===== 后端 API 服务 =====
+  - type: web
+    name: aigc-platform-backend
+    runtime: python
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: aigc-db
+          property: connectionString
+      - key: AIGC_PROVIDER
+        value: mock
+      - key: BLOCKCHAIN_PROVIDER
+        value: mock
+      - key: JWT_SECRET
+        value: aigc-platform-secret-2024
+
+  # ===== 前端静态站点 =====
+  - type: web
+    name: aigc-platform-frontend
+    runtime: static
+    region: singapore
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE
+        fromService:
+          type: web
+          name: aigc-platform-backend
+          property: url
+
+# ===== 数据库 =====
+databases:
+  - name: aigc-db
+    region: singapore
+    plan: free
+    databaseName: aigc_platform

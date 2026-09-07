@@ -1,0 +1,45 @@
+# 电商AIGC商品图合规溯源存证平台 - 基础设施配置
+# 使用方式：podman compose up -d  （或 docker compose up -d）
+
+services:
+  # ========== 主数据库 ==========
+  postgres:
+    image: postgres:15
+    container_name: aigc_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aigc_platform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql:Z
+
+  # ========== 对象存储（存商品图） ==========
+  minio:
+    image: minio/minio
+    container_name: aigc_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9000:9000"  # API 端口
+      - "9001:9001"  # 管理界面
+    volumes:
+      - miniodata:/data
+
+  # ========== 任务队列（异步生成图片） ==========
+  redis:
+    image: redis:7
+    container_name: aigc_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:
+  miniodata:
