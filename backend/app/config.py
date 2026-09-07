@@ -1,14 +1,15 @@
 """配置管理 - 读取 .env 环境变量"""
 from pydantic_settings import BaseSettings
 from pydantic import field_validator
+import os
 
 
 class Settings(BaseSettings):
     # 应用信息
     APP_NAME: str = "电商AIGC商品图合规溯源存证平台"
 
-    # 数据库
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres123@localhost:5432/aigc_platform"
+    # 数据库（默认 SQLite，部署到 PythonAnywhere 时无需额外数据库）
+    DATABASE_URL: str = "sqlite+aiosqlite:///./aigc_platform.db"
 
     # MinIO 对象存储
     MINIO_ENDPOINT: str = "localhost:9000"
@@ -37,8 +38,9 @@ class Settings(BaseSettings):
     @field_validator('DATABASE_URL', mode='before')
     @classmethod
     def convert_database_url(cls, v):
-        """将 Render 提供的 postgres:// 转为 SQLAlchemy asyncpg 格式"""
+        """自动转换数据库 URL 格式"""
         if isinstance(v, str):
+            # Render/Railway 提供的 postgres:// 转为 asyncpg 格式
             if v.startswith('postgres://'):
                 return v.replace('postgres://', 'postgresql+asyncpg://', 1)
             if v.startswith('postgresql://') and not v.startswith('postgresql+'):
