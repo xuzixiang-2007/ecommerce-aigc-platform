@@ -52,7 +52,11 @@ async def health():
     return {"status": "ok"}
 
 
-# 启动命令：uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# 启动命令：
+# 本地开发: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# 腾讯云 SCF: 通过 scf_bootstrap 启动，监听 9000 端口
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    import os
+    port = int(os.getenv("PORT", 9000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port)

@@ -8,8 +8,8 @@ class Settings(BaseSettings):
     # 应用信息
     APP_NAME: str = "电商AIGC商品图合规溯源存证平台"
 
-    # 数据库（默认 SQLite，部署到 PythonAnywhere 时无需额外数据库）
-    DATABASE_URL: str = "sqlite+aiosqlite:///./aigc_platform.db"
+    # 数据库（默认 SQLite，部署到腾讯云 SCF 时用 /tmp 目录）
+    DATABASE_URL: str = "sqlite+aiosqlite:////tmp/aigc_platform.db"
 
     # MinIO 对象存储
     MINIO_ENDPOINT: str = "localhost:9000"

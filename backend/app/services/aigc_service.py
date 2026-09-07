@@ -6,7 +6,7 @@ import io
 import time
 import asyncio
 from PIL import Image
-import imagehash
+from app.utils.phash import phash as compute_phash
 from app.config import settings
 
 
@@ -71,12 +71,12 @@ async def _generate_mock(product_name: str, category: str, prompt: str) -> dict:
 
     # 计算哈希
     image_hash = hashlib.sha256(image_bytes).hexdigest()
-    phash = str(imagehash.phash(img))
+    p_hash = compute_phash(img)
 
     return {
         "image_bytes": image_bytes,
         "image_hash": image_hash,
-        "phash": phash,
+        "phash": p_hash,
         "model_version": "mock-v1.0",
         "params": json.dumps({"prompt": prompt, "size": "512x512"}, ensure_ascii=False),
     }
@@ -154,12 +154,12 @@ async def _generate_wanx(product_name: str, category: str, prompt: str) -> dict:
                 # 计算哈希
                 img = Image.open(io.BytesIO(image_bytes))
                 image_hash = hashlib.sha256(image_bytes).hexdigest()
-                phash = str(imagehash.phash(img))
+                p_hash = compute_phash(img)
 
                 return {
                     "image_bytes": image_bytes,
                     "image_hash": image_hash,
-                    "phash": phash,
+                    "phash": p_hash,
                     "model_version": "wanx-v1",
                     "params": json.dumps(
                         {"prompt": prompt, "size": "1024x1024", "style": "<auto>"},
@@ -208,12 +208,12 @@ async def _generate_stability(prompt: str) -> dict:
     img = Image.open(io.BytesIO(image_bytes))
 
     image_hash = hashlib.sha256(image_bytes).hexdigest()
-    phash = str(imagehash.phash(img))
+    p_hash = compute_phash(img)
 
     return {
         "image_bytes": image_bytes,
         "image_hash": image_hash,
-        "phash": phash,
+        "phash": p_hash,
         "model_version": "stable-diffusion-v1.6",
         "params": json.dumps({"prompt": prompt, "size": "512x512"}, ensure_ascii=False),
     }

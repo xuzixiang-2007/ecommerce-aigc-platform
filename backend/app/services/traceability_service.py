@@ -21,10 +21,10 @@ def compute_phash(image_bytes: bytes) -> str:
     """计算感知哈希 pHash（用于图片相似度比对）"""
     from PIL import Image
     import io
-    import imagehash
+    from app.utils.phash import phash as compute_phash_internal
 
     img = Image.open(io.BytesIO(image_bytes))
-    return str(imagehash.phash(img))
+    return compute_phash_internal(img)
 
 
 def build_evidence_data(image_hash: str, phash: str, product_name: str, task_id: int) -> dict:
